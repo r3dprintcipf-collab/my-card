@@ -1,4 +1,2 @@
-window.MYCARD_CONFIG = {
-  supabaseUrl: "https://sagcerbjzfhcspyfrfxx.supabase.co",
-  supabaseAnonKey: "sb_publishable_6JBmxgIzNR1n8NMx3wlY5g_qiY_ZtoT"
-};
+// Replace these two values with your Supabase project URL and anon/public key.
+window.MYCARD_CONFIG = { supabaseUrl: "YOUR_SUPABASE_URL", supabaseAnonKey: "YOUR_SUPABASE_ANON_KEY" };
