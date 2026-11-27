@@ -1,15 +1,25 @@
 {
-  "name": "My Card",
+  "id": "./",
+  "name": "My Card — Digital Business Card",
   "short_name": "My Card",
+  "description": "Keep your digital business card close and easy to share.",
   "start_url": "./",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#111111",
-  "theme_color": "#111111",
+  "background_color": "#f8f7fc",
+  "theme_color": "#6b63f6",
   "icons": [
     {
       "src": "icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml"
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
   ]
 }
