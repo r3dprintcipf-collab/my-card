@@ -187,3 +187,28 @@ a{color:inherit}
 @media(max-width:680px){.sidebar{flex-wrap:wrap;gap:10px}.sidebar nav{order:3;width:100%;justify-content:space-between}.navitem{flex:1;justify-content:center;font-size:11px}.sidebottom .btn{font-size:10px}.mainarea{padding:22px 14px 40px}.topbar{align-items:flex-start;flex-direction:column;gap:14px}.topbar h1{font-size:29px}.topbar>#new{width:100%}.statrow{grid-template-columns:1fr 1fr}.stat:first-child{grid-column:1/-1}.stat{min-height:104px}.studio-grid{grid-template-columns:1fr}.previewpanel{position:static;grid-template-columns:1fr}.previewtitle{grid-column:auto}.editorpanel{padding:18px}.formgrid{grid-template-columns:1fr;gap:13px}.repeatrow{grid-template-columns:minmax(0,1fr) 58px 40px}.repeatrow input[data-link-url],.repeatrow input[data-social-url]{grid-column:1/3;grid-row:2}.repeatrow input[data-link-label],.repeatrow input[data-social-label]{grid-column:1}.repeatrow input[data-link-icon],.repeatrow input[data-social-icon]{grid-column:2;grid-row:1}.repeatrow .remove{grid-column:3;grid-row:1}.repeathead{align-items:flex-start}.repeathead .btn{white-space:nowrap;padding-inline:10px}.formactions{flex-wrap:wrap}.formactions>*{flex:1}.carditem{align-items:flex-start;flex-direction:column}.carditemactions{width:100%}.carditemactions .btn{flex:1}.public-shell{padding:0;background:#fff}.premium-card{min-height:100vh;width:100%;border-radius:0;border:0;box-shadow:none}.card-cover{height:168px}.identity-block{padding:0 20px}.premium-card .contact-actions{margin:21px 14px}.premium-card .contact-actions .btn{flex:1;padding-inline:9px}.contact-details{margin-inline:14px}.public-section{margin-inline:18px}.public-qr{margin-inline:14px}.premium-card .cardbottom{margin-top:20px}}
 @media(max-width:380px){.sidebar nav{gap:2px}.navitem{padding:9px 6px;font-size:10px}.nav-icon{display:none}.statrow{grid-template-columns:1fr}.stat:first-child{grid-column:auto}.repeathead{gap:8px}.repeathead h3{font-size:13px}.repeathead p{font-size:9px}.public-qr{gap:10px;padding:12px}.public-qr img{width:82px;height:82px;flex-basis:82px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+/* Home screen access */
+.install-open{overflow:hidden}
+.install-overlay{position:fixed;z-index:10000;inset:0;display:grid;place-items:center;padding:20px;background:rgba(23,20,39,.55);backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px)}
+.install-dialog{position:relative;width:min(470px,100%);max-height:min(88vh,760px);overflow:auto;padding:28px;border:1px solid #e7e3f2;border-radius:25px;background:#fff;color:#242333;box-shadow:0 28px 90px rgba(24,20,48,.26)}
+.install-close{position:absolute;top:16px;right:16px;width:38px;height:38px;border:1px solid #ebe8f2;border-radius:12px;background:#f7f6fa;color:#56536a;font-size:24px;line-height:1}
+.install-brand{display:flex;align-items:center;gap:10px;margin-bottom:22px;color:#37344d;font-size:12px;font-weight:800;letter-spacing:.08em}
+.install-brand small{display:block;margin-top:3px;color:#8a86a0;font-size:9px;letter-spacing:.15em}
+.install-brandmark{display:grid;place-items:center;width:38px;height:38px;border-radius:13px;background:linear-gradient(135deg,#8e7dff,#5f4ce0);color:#fff;font:800 17px Manrope;box-shadow:0 8px 18px #6c5bf333}
+.install-dialog h2{margin:0;font:800 25px Manrope;letter-spacing:-.04em}
+.install-intro{margin:8px 0 19px;color:#77748c;font-size:14px;line-height:1.55}
+.install-card-summary{display:flex;align-items:center;gap:13px;padding:13px;border:1px solid #ebe8f3;border-radius:16px;background:#faf9fd}
+.install-avatar{display:grid;place-items:center;flex:0 0 44px;width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#8b7bff,#5d4be0);color:#fff;font:800 15px Manrope}
+.install-card-copy{display:grid;gap:3px;min-width:0}
+.install-card-copy b{overflow:hidden;color:#302e43;text-overflow:ellipsis;white-space:nowrap;font-size:14px}
+.install-card-copy small{overflow:hidden;color:#89869b;text-overflow:ellipsis;white-space:nowrap;font-size:11px}
+.install-card-arrow{margin-left:auto;color:#7262ed;font-size:19px}
+.install-instructions{margin-top:22px;color:#555267;font-size:14px;line-height:1.6}
+.install-instructions h3{margin:0 0 8px;color:#37344d;font:700 15px Manrope}
+.install-instructions p{margin:0}
+.install-instructions ol{display:grid;gap:8px;margin:0;padding-left:21px}
+.install-instructions li{padding-left:2px}
+.install-note{margin:18px 0 20px;padding:12px 13px;border-radius:12px;background:#f4f1ff;color:#625b87;font-size:12px;line-height:1.5}
+.install-done{width:100%;min-height:46px}
+@media(max-width:560px){.install-overlay{align-items:end;padding:10px}.install-dialog{max-height:90vh;padding:24px 20px 20px;border-radius:23px}.install-brand{margin-bottom:18px}.install-dialog h2{padding-right:36px;font-size:23px}}
