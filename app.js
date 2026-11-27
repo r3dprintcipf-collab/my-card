@@ -1,5 +1,12 @@
 (()=>{
-const root=document.getElementById('app'),cfg=window.MYCARD_CONFIG||{},db=cfg.supabaseUrl&&cfg.supabaseAnonKey&&window.supabase?window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey):null,slug=new URLSearchParams(location.search).get('card');
+const root=document.getElementById('app'),cfg=window.MYCARD_CONFIG||{},db=cfg.supabaseUrl&&cfg.supabaseAnonKey&&window.supabase?window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey):null,requestedSlug=new URLSearchParams(location.search).get('card');
+const standaloneMode=()=>Boolean(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone===true;
+let storedHomeSlug=null;try{if(standaloneMode()&&location.hash!=='#admin')storedHomeSlug=localStorage.getItem('mycard-home-card')}catch{}
+const slug=requestedSlug||(location.hash==='#admin'?null:storedHomeSlug);
+let installPromptEvent=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPromptEvent=e});
+window.addEventListener('appinstalled',()=>{installPromptEvent=null});
+window.addEventListener('appinstalled',()=>{installPromptEvent=null});
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let cards=[],editing=null,links=[],socials=[];
 const urlCard=s=>location.origin+location.pathname+'?card='+encodeURIComponent(s);
@@ -10,6 +17,28 @@ function download(c){let a=document.createElement('a');a.href=URL.createObjectUR
 function iconFor(label){return ({WhatsApp:'\u25c9',Email:'\u2709',Phone:'\u260e',Website:'\u2197',LinkedIn:'in',Instagram:'\u25ce',Facebook:'f',TikTok:'\u266a',X:'\ud835\udd4f'})[label]||'\u2197'}
 function safeUrl(value,{image=false}={}){if(!value)return'';const raw=String(value).trim();if(image&&/^data:image\/(?:png|jpe?g|gif|webp);base64,/i.test(raw))return raw;try{const parsed=new URL(raw,location.href);const allowed=image?['http:','https:']:['http:','https:','mailto:','tel:','sms:'];return allowed.includes(parsed.protocol)?parsed.href:''}catch{return''}}
 function contactRow(icon,label,value,href){if(!value)return'';return `<a class="detail-row" href="${esc(href)}" ${href.startsWith('http')?'target="_blank" rel="noopener noreferrer"':''}><span class="detail-icon" aria-hidden="true">${icon}</span><span class="detail-copy"><small>${esc(label)}</small><b>${esc(value)}</b></span><span class="detail-arrow" aria-hidden="true">\u2197</span></a>`}
+function showHomeScreenGuide(c,mode='guide'){
+ const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),isAndroid=/android/i.test(navigator.userAgent);
+ const initials=(c.name||'M').trim().split(/\s+/).slice(0,2).map(n=>n[0]).join('').toUpperCase(),role=[c.role,c.company].filter(Boolean).map(esc).join(' · ');
+ let heading='Keep this card close',instructions='';
+ if(mode==='added'){heading='Card added to your Home Screen';instructions='<p>Open the My Card icon on your phone to return to this digital card.</p>'}
+ else if(mode==='already'){heading='This card is ready';instructions='<p>Open the My Card icon on your Home Screen to return to this card.</p>'}
+ else if(isIOS){instructions='<h3>On iPhone</h3><ol><li>Open this page in <b>Safari</b>.</li><li>Tap the <b>Share</b> button.</li><li>Choose <b>Add to Home Screen</b>, leave <b>Open as Web App</b> enabled if shown, then tap <b>Add</b>.</li></ol>'}
+ else if(isAndroid){instructions='<h3>On Android</h3><ol><li>Tap <b>Install</b> if your browser offers it.</li><li>Otherwise open the browser menu <b>⋮</b> and choose <b>Install app</b> or <b>Add to Home screen</b>.</li></ol>'}
+ else{instructions='<h3>On your phone</h3><p>Open this card in Safari on iPhone or Chrome on Android, then use the browser menu to add it to your Home Screen.</p>'}
+ const overlay=document.createElement('div');overlay.className='install-overlay';overlay.innerHTML='<section class="install-dialog" role="dialog" aria-modal="true" aria-labelledby="installTitle"><button class="install-close" type="button" data-close-install aria-label="Close">×</button><div class="install-brand"><span class="install-brandmark">M</span><span>MY CARD <small>QUICK ACCESS</small></span></div><h2 id="installTitle">'+heading+'</h2><p class="install-intro">Open '+esc(c.name||'this card')+'’s digital card from your Home Screen.</p><div class="install-card-summary"><span class="install-avatar">'+esc(initials)+'</span><span class="install-card-copy"><b>'+esc(c.name||'Digital business card')+'</b><small>'+role+'</small></span><span class="install-card-arrow" aria-hidden="true">↗</span></div><div class="install-instructions">'+instructions+'</div><p class="install-note">This adds a shortcut that opens the card. A website cannot place a live iPhone widget on the Home Screen.</p><button class="btn primary install-done" type="button" data-close-install>Got it</button></section>';
+ document.body.classList.add('install-open');document.body.appendChild(overlay);
+ const close=()=>{overlay.remove();document.body.classList.remove('install-open');document.removeEventListener('keydown',onKey)};
+ const onKey=e=>{if(e.key==='Escape')close()};
+ overlay.addEventListener('click',e=>{if(e.target===overlay||e.target.closest('[data-close-install]'))close()});
+ document.addEventListener('keydown',onKey);overlay.querySelector('[data-close-install]')?.focus();
+}
+function startCardInstall(c){
+ try{localStorage.setItem('mycard-home-card',c.slug)}catch{}
+ if(standaloneMode()){showHomeScreenGuide(c,'already');return}
+ if(installPromptEvent){const promptEvent=installPromptEvent;installPromptEvent=null;promptEvent.prompt().then(()=>promptEvent.userChoice).then(choice=>showHomeScreenGuide(c,choice.outcome==='accepted'?'added':'guide')).catch(()=>showHomeScreenGuide(c,'guide'));return}
+ showHomeScreenGuide(c,'guide');
+}
 function publicView(c){
  const accent=/^#[\da-f]{6}$/i.test(c.accent||'')?c.accent:'#6b63f6',photo=safeUrl(c.photo,{image:true}),logo=safeUrl(c.logo,{image:true}),phone=c.phone?`tel:${String(c.phone).replace(/[^+\d*#,;]/g,'')}`:'',email=c.email?`mailto:${encodeURIComponent(c.email).replace(/%40/g,'@')}`:'',website=c.website?safeUrl(/^https?:\/\//i.test(c.website)?c.website:`https://${c.website}`):'',profileUrl=urlCard(c.slug),qrUrl='https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data='+encodeURIComponent(profileUrl),roleline=[c.role,c.company].filter(Boolean).map(esc).join(' <span aria-hidden="true">\u00b7</span> ');
  const socials=(c.socials||[]).filter(x=>safeUrl(x.url)).map(x=>`<a class="social-link" href="${esc(safeUrl(x.url))}" target="_blank" rel="noopener noreferrer" aria-label="${esc(x.label||'Social profile')}" title="${esc(x.label||'Social profile')}"><span>${esc(x.icon||iconFor(x.label))}</span></a>`).join('');
@@ -17,14 +46,14 @@ function publicView(c){
  root.innerHTML=`<main class="public-shell"><article class="public-card premium-card" style="--accent:${accent}">
   <div class="card-cover"><div class="cover-glow"></div>${logo?`<img class="brand-logo" src="${esc(logo)}" alt="${esc(c.company||'Company logo')}" loading="lazy">`:''}</div>
   <div class="identity-block">${photo?`<img class="portrait" src="${esc(photo)}" alt="Portrait of ${esc(c.name)}">`:`<div class="portrait portrait-fallback" aria-hidden="true">${esc((c.name||'M').trim().split(/\s+/).slice(0,2).map(n=>n[0]).join('').toUpperCase())}</div>`}<p class="profile-kicker">DIGITAL BUSINESS CARD</p><h1>${esc(c.name||'')}</h1><div class="subtitle">${roleline||'Professional profile'}</div></div>
-  <div class="contact-actions"><button class="btn primary" id="saveContact"><span aria-hidden="true">\u2295</span> Add to contacts</button>${phone?`<a class="btn secondary" href="${esc(phone)}">Call</a>`:''}${email?`<a class="btn secondary" href="${esc(email)}">Email</a>`:''}</div>
+  <div class="contact-actions"><button class="btn primary" id="saveContact"><span aria-hidden="true">\u2295</span> Add to contacts</button><button class="btn secondary" id="installCard" type="button"><span aria-hidden="true">⌂</span> Add to Home Screen</button>${phone?`<a class="btn secondary" href="${esc(phone)}">Call</a>`:''}${email?`<a class="btn secondary" href="${esc(email)}">Email</a>`:''}</div>
   <section class="contact-details" aria-label="Contact details">${contactRow('\u2709','EMAIL',c.email,email)}${contactRow('\u260e','PHONE',c.phone,phone)}${c.address?`<div class="detail-row detail-static"><span class="detail-icon" aria-hidden="true">\u2316</span><span class="detail-copy"><small>ADDRESS</small><b>${esc(c.address)}</b></span></div>`:''}${website?contactRow('\u2197','WEBSITE',c.website,website):''}</section>
   ${links?`<section class="public-section"><p class="section-label">EXPLORE</p><div class="quicklinks">${links}</div></section>`:''}
   ${socials?`<section class="public-section social-section"><p class="section-label">FIND ME ONLINE</p><div class="socialrow">${socials}</div></section>`:''}
   <section class="public-qr" aria-label="Card QR code"><img src="${esc(qrUrl)}" alt="QR code linking to ${esc(c.name)}'s digital business card" loading="lazy"><div><p class="section-label">SHARE MY CARD</p><h2>One scan away</h2><p>Scan to open this digital card.</p><button id="shareCard" class="text-button" type="button">Copy card link <span aria-hidden="true">\u2197</span></button></div></section>
   <footer class="cardbottom"><span class="footer-mark">M</span><span>MY CARD <i>\u00b7</i> DIGITAL IDENTITY</span></footer>
  </article></main>`;
- document.querySelector('#saveContact').onclick=()=>download(c);document.querySelector('#shareCard').onclick=()=>navigator.clipboard.writeText(profileUrl).then(()=>{const b=document.querySelector('#shareCard');b.textContent='Link copied';setTimeout(()=>{if(b.isConnected)b.innerHTML='Copy card link <span aria-hidden="true">\u2197</span>'},1800)}).catch(()=>window.prompt('Copy this card link',profileUrl));
+ document.querySelector('#saveContact').onclick=()=>download(c);document.querySelector('#installCard').onclick=()=>startCardInstall(c);document.querySelector('#shareCard').onclick=()=>navigator.clipboard.writeText(profileUrl).then(()=>{const b=document.querySelector('#shareCard');b.textContent='Link copied';setTimeout(()=>{if(b.isConnected)b.innerHTML='Copy card link <span aria-hidden="true">\u2197</span>'},1800)}).catch(()=>window.prompt('Copy this card link',profileUrl));
 }
 function login(){root.innerHTML=`<main class="public-shell"><section class="loginpanel panel"><div class="brandmark">M</div><p class="eyebrow">MY CARD STUDIO</p><h1>Welcome back</h1><p class="muted">Sign in to manage your digital cards.</p><form id="login"><label>Email<input name="email" type="email" required></label><label>Password<input name="password" type="password" required></label><button class="btn primary">Sign in</button></form><div id="notice"></div></section></main>`;document.querySelector('#login').onsubmit=async e=>{e.preventDefault();let f=new FormData(e.target);let r=await db.auth.signInWithPassword({email:f.get('email'),password:f.get('password')});if(r.error)msg(r.error.message,true);else studio()}}
 function rowEditor(type,arr){return arr.map((x,i)=>`<div class="repeatrow"><input data-${type}-label="${i}" placeholder="Label" value="${esc(x.label||'')}"><input data-${type}-icon="${i}" placeholder="Icon" value="${esc(x.icon||'')}"><input data-${type}-url="${i}" placeholder="URL" value="${esc(x.url||'')}"><button type="button" class="remove" data-${type}-remove="${i}">×</button></div>`).join('')}
@@ -54,5 +83,6 @@ function loadIntoEditor(c){let f=document.querySelector('#editor');for(let k of 
 async function fetchCards(){let r=await db.from('cards').select('*').order('created_at',{ascending:false});if(r.error){msg(r.error.message,true);return}cards=r.data||[]}
 async function admin(){if(!db){root.innerHTML='<div class="centerpanel"><h1>Configuration error</h1><p>Check config.js</p></div>';return}let r=await db.auth.getSession();if(!r.data.session){login();return}await fetchCards();studio()}
 async function route(){if(slug){if(!db){root.innerHTML='Configuration unavailable';return}let r=await db.from('cards').select('*').eq('slug',slug).eq('published',true).single();if(r.error||!r.data){root.innerHTML='<div class="centerpanel">Card not found</div>';return}publicView(r.data)}else if(location.hash==='#admin')admin();else root.innerHTML='<main class="public-shell"><div class="centerpanel"><div class="brandmark">M</div><h1>My Card</h1><p>Digital business card platform</p><a class="btn primary" href="#admin">Admin</a></div></main>'}
+if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('./sw.js').catch(()=>{});
 route();
 })();
