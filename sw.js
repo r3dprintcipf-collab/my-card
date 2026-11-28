@@ -1,5 +1,5 @@
-const VERSION='my-card-home-v2';
-const CORE=['./','./index.html','./manifest.json?v=card-launch-fr-2','./icon.svg','./style.css?v=card-launch-fr-2','./app.js?v=card-launch-fr-2','./config.js'];
+const VERSION='my-card-home-v3';
+const CORE=['./','./index.html','./manifest.json?v=card-launch-fr-3','./icon.svg','./style.css?v=card-launch-fr-3','./app.js?v=card-launch-fr-3','./config.js'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(VERSION).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('my-card-home-')&&key!==VERSION).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',event=>{
