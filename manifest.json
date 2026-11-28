@@ -1,9 +1,8 @@
 {
   "id": "./",
-  "name": "My Card — Digital Business Card",
-  "short_name": "My Card",
-  "description": "Keep your digital business card close and easy to share.",
-  "start_url": "./",
+  "name": "Ma carte de visite",
+  "short_name": "Ma carte",
+  "description": "Accédez directement à cette carte de visite numérique.",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f8f7fc",
